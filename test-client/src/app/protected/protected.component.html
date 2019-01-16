@@ -1,7 +1,10 @@
 <h3><a routerLink="/">Home</a> | <a routerLink="/protected">Protected</a> </h3>>
 <h1>{{title}}</h1>
 
-<router-outlet></router-outlet>
-
+<p>protected msg</p>
+<button (click)="getLesson()">Get Lesson</button>
+<ul *ngIf="lessons">
+  <li *ngFor="let lesson of lessons">{{lesson}}</li>
+</ul>
 
 

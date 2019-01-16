@@ -2,6 +2,14 @@ import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http'
 import { shareReplay } from 'rxjs/operators'
 import * as moment from 'moment'
+import { Observable, pipe } from 'rxjs';
+import {tap } from 'rxjs/operators'
+import { headersToString } from 'selenium-webdriver/http';
+
+class Token {
+  token: string;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -9,16 +17,23 @@ import * as moment from 'moment'
 export class AuthService {
 
   constructor(private http: HttpClient) { }
-
-  login(email: string, password: string){
-    return this.http.post<User>('/api/login', {email, password})
-      .do(res => this.setSession)
-      .shareReplay()
+  
+  login(email: string, password: string): Observable<Token>{
+    // const headers = new Headers()
+    // headers.append("Access-Control-Allow-Origin", '*')
+    console.log(email, password);
+    
+    return this.http.post<Token>('http://localhost:4001/api/login', {email, password} )
+      .pipe(
+        tap(x => this.setSession(x)),
+        shareReplay()
+      )
   }
 
   private setSession(authResult){
     const expiresAt = moment().add(authResult.expiresIn, 'second')
-    localStorage.setItem('id_token', authResult.idToken)
+    console.log('set session', authResult);
+    localStorage.setItem('id_token', authResult.token)
     localStorage.setItem("expires_at", JSON.stringify(expiresAt.valueOf()))
   }
 

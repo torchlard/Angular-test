@@ -6,6 +6,11 @@ import { ProtectedComponent } from './protected/protected.component';
 import { AuthGuardService } from './services/auth-guard.service';
 import { AuthService } from './services/auth.service';
 import { LoginComponent } from './login/login.component';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { AuthInterceptor } from './services/auth.interceptor';
+import { ReactiveFormsModule } from '@angular/forms';
+import { APP_BASE_HREF } from '@angular/common';
+
 
 @NgModule({
   declarations: [
@@ -15,9 +20,24 @@ import { LoginComponent } from './login/login.component';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    ReactiveFormsModule,
+    HttpClientModule
   ],
-  providers: [AuthGuardService, AuthService],
+  providers: [
+    AuthService, 
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    },
+    {
+      provide: APP_BASE_HREF,
+      useValue: '/'
+    },
+    AuthGuardService
+  ],
   bootstrap: [AppComponent]
 })
+
 export class AppModule { }

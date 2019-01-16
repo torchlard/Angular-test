@@ -24,17 +24,27 @@ export class LoginComponent implements OnInit {
     }
 
   ngOnInit() {
+    this.authService.logout()
   }
 
   login(){
     const val = this.form.value
+
+    console.log(val);
 
     if (val.email && val.password){
       this.authService.login(val.email, val.password)
         .subscribe(
           () => {
             console.log('user logged in')
-            this.router.navigateByUrl("/")
+            this.router.navigateByUrl("/protected")
+          },
+          err => {
+            if (err.status === 401){
+              window.alert("incorrect pwd")
+            } else {
+              window.alert("unknown error")
+            }
           }
         )
     }

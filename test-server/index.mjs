@@ -5,13 +5,19 @@ import * as expressJwt from 'express-jwt'
 import jwt from 'jsonwebtoken'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
-import * as fs from 'fs'
+import fs from 'fs'
 
-const privateKey = 'secretkey'
+const privatekey = fs.readFileSync('./demos/private.key')
+// const privateKey = 'secretkey'
 
 const app = express()
 app.use(bodyParser.json())
-
+app.use((req,res, next) => {
+  res.header("Access-Control-Allow-Origin", "*")
+  res.header('Access-Control-Allow-Headers', 'Authorization, Origin, Accept, X-Requested-With, Content-Type');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE');
+  next()
+})
 
 app.route('/test').get((req,res) => {
   res.json({'reply': 'hel'})
@@ -32,7 +38,6 @@ app.route('/api/lessons').get(verifyToken, (req,res) => {
 })
 
 
-// const rsa_key = fs.readFileSync('./demos/private.key')
 
 
 function loginRoute(req, res){
@@ -47,43 +52,26 @@ function loginRoute(req, res){
     }
 
     // const jwtBearerToken = 
-    jwt.sign({user}, privateKey, {expiresIn: '20s'}, (err,token) => {
+    jwt.sign({user}, privateKey, {expiresIn: '1800s'}, (err,token) => { // 
       // algorithm: 'RS256',
       // expiresIn: 120,
       // subject: userId
       res.json({
-        token
+        token: token,
+        expiresIn: 1800
       })
     })
 
-    // res.cookie("SESSIONID", jwtBearerToken, {httpOnly: true}) // secure: true
-
-    // res.status(200).join({
-    //   idToken: jwtBearerToken,
-    //   // expiresIn: 
-    // })
-    
   } else {
     res.sendStatus(401)
   }
   
 }
 
-// verifyToken
-// const verifyToken = expressJwt({
-//   secret: jwksRsd.expressJwtSecret({
-//     cache: true,
-//     rateLimit: true,  // library won't make >10 requests / min
-//     jwksUri: "./demos/jwks.json"
-//   }),
-//   algorithm: ['RS256']
-// })
-
 
 function verifyToken(req,res,next) {
-  console.log(req.headers);
   const bearerHeader = req.headers['authorization']
-
+  
   if (typeof bearerHeader !== 'undefined'){
     const bearer = bearerHeader.split(" ")
     const bearerToken = bearer[1]
